@@ -1,7 +1,9 @@
 import tensorflow.keras as keras
 import pandas as pd
 from tensorflow.keras import layers
-data = pd.read_csv('../sources/Advertising.csv')
+
+# 广告投入与利润数据集
+data = pd.read_csv('../sources/6thDatas.csv')
 # print(data.head())
 x = data[data.columns[1:-1]]
 # iloc取值
