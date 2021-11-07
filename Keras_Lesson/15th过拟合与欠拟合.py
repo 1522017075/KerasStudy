@@ -16,7 +16,9 @@ x = data.iloc[:, :-1].values
 y = data.iloc[:, -1].replace(-1, 0).values.reshape(-1, 1)
 
 model = keras.Sequential()
-model.add(layers.Dense(128, input_shape=(None, 15), activation='relu'))
+# 用input_shape就得是上面这个格式(TensorFlow 1.15)  TensorFlow2.2就可以写成input_shape=(None, 15)
+# model.add(layers.Dense(128, input_shape=(x.shape[1],), activation='relu'))
+model.add(layers.Dense(128, input_dim=15, activation='relu'))
 model.add(layers.Dense(128, activation='relu'))
 model.add(layers.Dense(128, activation='relu'))
 model.add(layers.Dense(1, activation='sigmoid'))
@@ -38,7 +40,7 @@ x_test = x[int(len(x) * 0.75):]
 y_train = y[:int(len(y) * 0.75)]
 y_test = y[int(len(y) * 0.75):]
 
-history = model.fit(x_train, y_train, epochs=1000, validation_data=(x_test, y_test))
+history = model.fit(x_train, y_train, epochs=100, validation_data=(x_test, y_test))
 # 拟合出来的: loss: 0.0853 - acc: 0.9796
 model.evaluate(x_train, y_train)
 # 测试出来的: loss: 2.6663 - acc: 0.7256
