@@ -16,12 +16,11 @@ x = data.iloc[:, :-1].values
 y = data.iloc[:, -1].replace(-1, 0).values.reshape(-1, 1)
 
 model = keras.Sequential()
-# 用input_shape就得是上面这个格式(TensorFlow 1.15)  TensorFlow2.2就可以写成input_shape=(None, 15)
-# model.add(layers.Dense(128, input_shape=(x.shape[1],), activation='relu'))
-# 把第二层输入改成1，就可以造成欠拟合
-model.add(layers.Dense(128, input_dim=15, activation='relu'))
-model.add(layers.Dense(128, activation='relu'))
-model.add(layers.Dense(128, activation='relu'))
+from keras import regularizers
+# kernel_regularizer= 使用它进行Dense层的l2正则, 并输入loss惩罚权重0.005(手动设置)
+model.add(layers.Dense(128, kernel_regularizer=regularizers.l1(0.005), input_dim=15, activation='relu'))
+model.add(layers.Dense(128, kernel_regularizer=regularizers.l1(0.005), activation='relu'))
+model.add(layers.Dense(128, kernel_regularizer=regularizers.l1(0.005), activation='relu'))
 model.add(layers.Dense(1, activation='sigmoid'))
 
 history = model.compile(
@@ -41,12 +40,14 @@ x_test = x[int(len(x) * 0.75):]
 y_train = y[:int(len(y) * 0.75)]
 y_test = y[int(len(y) * 0.75):]
 
-history = model.fit(x_train, y_train, epochs=100, validation_data=(x_test, y_test))
-# 拟合出来的: loss: 0.0853 - acc: 0.9796
+history = model.fit(x_train, y_train, epochs=1000, validation_data=(x_test, y_test))
 print("训练数据集表现:")
 model.evaluate(x_train, y_train)
-# 测试出来的: loss: 2.6663 - acc: 0.7256
 print("测试数据集表现:")
+# l1正则loss惩罚权重0.005: loss: 0.4620 - acc: 0.8598
+# l1正则loss惩罚权重0.001: loss: 0.9559 - acc: 0.7744
+# l2正则loss惩罚权重0.005: loss: 0.7649 - acc: 0.6951
+# l2正则loss惩罚权重0.001: loss: 1.1561 - acc: 0.7378
 model.evaluate(x_test, y_test)
 
 plt.plot(history.epoch, history.history.get('val_acc'), c='r', label='val_acc')
