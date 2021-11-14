@@ -1,20 +1,21 @@
-import tensorflow.keras as keras
+import keras
 # 科学计算
 import numpy as np
 # 画图
 import matplotlib.pyplot as plt
 # 层
-from tensorflow.keras import layers
+from keras import layers
 
-import tensorflow.keras.datasets.mnist as mnist
+import keras.datasets.mnist as mnist
 
 (train_image, train_label), (test_image, test_label) = mnist.load_data()
-# 优化模型步骤1: 增大网络容量, 直到过拟合
+
 model = keras.Sequential()
+# Flatten层可以展平二维数据 (60000, 28, 28) ---> (60000, 28*28)
 model.add(layers.Flatten())
+# 全连接层, 输出使用64单元的隐藏层, 激活函数relu
 model.add(layers.Dense(64, activation='relu'))
-model.add(layers.Dense(64, activation='relu'))
-model.add(layers.Dense(64, activation='relu'))
+# 输出层, 输出使用10单元, 激活函数为softmax
 model.add(layers.Dense(10, activation='softmax'))
 
 # 编译模型
@@ -27,9 +28,8 @@ model.compile(
     metrics=['acc']
 )
 
-# 训练模型(一个批次512张图, 训练50次) validation_data查看训练过程中测试数据的表现
-model.fit(train_image, train_label, epochs=50, batch_size=512, validation_data=(test_image, test_label))
+# 训练模型(一个批次512张图, 训练50次)
+model.fit(train_image, train_label, epochs=50, batch_size=512)
 
-# 增大网络容量后的测试模型 loss: 0.2418 - acc: 0.9646
+# 测试模型 loss: 0.3546 - acc: 0.9458
 model.evaluate(test_image, test_label)
-
