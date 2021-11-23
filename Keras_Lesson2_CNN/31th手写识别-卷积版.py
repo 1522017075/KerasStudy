@@ -50,6 +50,6 @@ model.compile(
     metrics=['acc']
 )
 history = model.fit(train_image, train_label, epochs=5, batch_size=512, validation_data=(test_image, test_label))
-
+model.save('../model/31th.h5')
 tools.show_accuracy(history)
 
