@@ -50,6 +50,8 @@ model.compile(
     metrics=['acc']
 )
 history = model.fit(train_image, train_label, epochs=5, batch_size=512, validation_data=(test_image, test_label))
+# my_model_json = model.to_json() 这种方式可以得到json字符串, 里面只保存了模型的结构, 没有权重(没有训练过)
+# model.save_weights('../model/31th_weights.h5) 这种方式可以保存权重到h5文件, 没有模型结构
 model.save('../model/31th.h5')
 tools.show_accuracy(history)
 
