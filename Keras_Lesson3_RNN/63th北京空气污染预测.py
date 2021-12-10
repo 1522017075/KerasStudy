@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import re
 from tensorflow.keras import layers
 
+import tools
+
 """
     目标: 根据多种数据预测 PM2.5 的值
 """
@@ -88,9 +90,52 @@ train_y = y[:split_b]
 test_x = x[split_b:]
 test_y = y[split_b:]
 
-# 数据标准化 计算均值mean和方差std axis=0: 列为单位(暂时不明白), 然后对数据减均值除方差即可
+# 数据标准化 计算均值mean和方差std axis=0: 列为单位(暂时不明白), 然后对数据减均值除方差即可. (无须对预测结果做标准化)
 mean = train_x.mean(axis=0)
 std = train_x.std(axis=0)
 
 train_x = (train_x - mean)/std
 test_x = (test_x - mean)/std
+
+"""
+# 用全连接炼丹
+batch_size = 128
+
+model = keras.Sequential()
+
+# train_x.shape 为(34924, 120, 11), 不能直接被输入, 需要 Flatten 展开数据为一维
+# (展开之后其实也就是失去了[时间]维度, 所以效果会比 LSTM 差劲)
+model.add(layers.Flatten(input_shape=(train_x.shape[1:])))
+model.add(layers.Dense(32, activation='relu'))
+model.add(layers.Dense(1))
+
+# mse: Mean Square Error 均方误差
+# mae: mean_absolute_error 平均绝对误差
+model.compile(
+    optimizer='adam',
+    loss='mse',
+    metrics=['mae']
+)
+
+history = model.fit(train_x, train_y, batch_size=batch_size, epochs=50, validation_data=(test_x, test_y))
+
+tools.show_loss(history)
+最终平均误差大概是 50 左右, 即, 正确值为 300, 那么预测数据可能是 250 ~ 350 之间
+"""
+
+# LSTM 炼丹: 对时序数据
+batch_size = 128
+model = keras.Sequential()
+# train_x.shape 为(34924, 120, 11), 可以直接输入 LSTM, 32 个隐藏单元
+model.add(layers.LSTM(32, input_shape=(120, 11)))
+model.add(layers.Dense(1))
+
+model.compile(
+    optimizer='adam',
+    loss='mse',
+    metrics=['mae']
+)
+
+history = model.fit(train_x, train_y, batch_size=batch_size, epochs=50, validation_data=(test_x, test_y))
+
+tools.show_loss(history)
